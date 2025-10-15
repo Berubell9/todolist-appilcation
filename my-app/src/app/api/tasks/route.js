@@ -1,5 +1,5 @@
 export const runtime = "nodejs";
-const BASE = process.env.API_BASE_URL || "http://localhost:3001";
+const BASE = process.env.API_BASE_URL || "http://localhost:5000";
 
 // ดึงลิสต์งาน
 export async function GET(req) {

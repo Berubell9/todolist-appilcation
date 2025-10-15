@@ -2,7 +2,7 @@
 export const runtime = "nodejs";
 
 // มีค่า fallback เผื่อไม่ได้ตั้ง .env.local
-const BASE = process.env.API_BASE_URL || "http://localhost:3001";
+const BASE = process.env.API_BASE_URL || "http://localhost:5000";
 
 // ทุกฟังก์ชันที่ใช้ params ต้อง await context.params
 // PUT อัปเดต task
