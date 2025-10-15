@@ -34,6 +34,7 @@ export default function NewTaskForm({ form, setForm, onSubmit }) {
           type="date"
           value={form.due_date}
           onChange={(e) => setForm((f) => ({ ...f, due_date: e.target.value }))}
+          min={new Date().toISOString().split("T")[0]} 
           className="rounded-xl border border-base bg-card text-base px-3 py-2"
         />
         <button className="btn-primary rounded-xl px-4 py-2 hover:opacity-90">Add Task</button>
