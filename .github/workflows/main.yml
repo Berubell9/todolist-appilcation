@@ -1,0 +1,45 @@
+name: Continous Integrate (CI)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout code from the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      # Set up Docker
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Login to NIPA Cloud Registry
+      - name: Login to NIPA Cloud Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: registry.nipa.cloud
+          username: ${{ secrets.NIPA_USERNAME }}
+          password: ${{ secrets.NIPA_PASSWORD }}
+
+      # Build & Push Frontend image
+      - name: Build and Push Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./my-app
+          file: ./my-app/Dockerfile
+          push: true
+          tags: registry.nipa.cloud/lun-test/frontend:1.0.0
+
+      # Build & Push Backend image
+      - name: Build and Push Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./api
+          file: ./api/Dockerfile
+          push: true
+          tags: registry.nipa.cloud/lun-test/backend:1.0.0
