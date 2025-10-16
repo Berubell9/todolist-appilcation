@@ -57,7 +57,7 @@ jobs:
 
       - name: Test (frontend)
         working-directory: ./my-app
-        run: npm test
+        run: npm test --if-present -- --ci
 
       # ---------- Backend ----------
       - name: Install deps (backend)
@@ -80,7 +80,7 @@ jobs:
 
       - name: Build (backend)
         working-directory: ./api
-        run: npm run build --if-present
+        run: npm run build 
 
       - name: Test (backend)
         working-directory: ./api
@@ -91,7 +91,7 @@ jobs:
           DB_USER: appuser
           DB_PASSWORD: appPass123
           DB_NAME: todo_app
-        run: npm test
+        run: npm test --if-present -- --ci
 
   # ==============================================================
   # 🐳 2. Build & Push Docker images → NIPA Cloud
