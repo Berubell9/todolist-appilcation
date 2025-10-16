@@ -1,17 +1,15 @@
-name: Quality Gate + Build & Push
+name: Continuous Integration (CI)
 
 on:
   push:
     branches: [main]
 
 jobs:
-  # ==============================================================
-  # ✅ 1. ตรวจสอบคุณภาพ (Lint + Build + Test)
-  # ==============================================================
-  test-quality:
-    name: Lint • Build • Test
+  test-api:
+    name: Test API
     runs-on: ubuntu-latest
 
+    # ---------- MySQL ----------
     # เพิ่ม MySQL Service เพื่อใช้ทดสอบ Backend
     services:
       mysql:
@@ -28,52 +26,57 @@ jobs:
           --health-interval=5s --health-timeout=3s --health-retries=30
 
     steps:
-      - name: Checkout
+      # Checkout code from the repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Set up Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20.x'
           cache: npm
           cache-dependency-path: |
             my-app/package-lock.json
             api/package-lock.json
 
       # ---------- Frontend ----------
-      - name: Install deps (frontend)
+      - name: Install dependencies (frontend)
         working-directory: ./my-app
         run: npm ci
 
-      - name: Lint (frontend)
+      # ช่วยตรวจสอบไวยกรณ์ เและทำให้โค้ดเป็นมาตรฐาน เช่น การเว้นวรรค หรือเครื่องหมาย
+      # ใช้เครื่องมือ eslint https://medium.com/lotuss-it/eslint-tool-ที่ทำให้โค้ดสวยขึ้น-9384a9c43d3c
+      - name: Run Linting tests (frontend)
         working-directory: ./my-app
         run: npm run lint 
 
-      - name: Build (frontend)
+      - name: Run Build (frontend)
         working-directory: ./my-app
-        env:
-          NEXT_PUBLIC_API_BASE_URL: http://localhost:5000
         run: npm run build
 
-      - name: Test (frontend)
-        working-directory: ./my-app
-        run: npm test
-
       # ---------- Backend ----------
-      - name: Install deps (backend)
+      - name: Install dependencies (backend)
         working-directory: ./api
         run: npm ci
 
-      - name: Wait for DB healthy & seed schema
+      # รอให้ MySQL พร้อมก่อน เนื่องจาก อาจจะขึ้นสถานะ Running เเล้ว เเต่เมื่อเอา schema.sql เข้าไปเลยจะเกิด ERROR 
+      - name: Wait for DB healthy
         run: |
           sudo apt-get update && sudo apt-get install -y mysql-client
-          # รอจน MySQL พร้อม (กัน timing issue)
-          for i in {1..40}; do
+
+          # เป็นคำสั่งเช็คว่า MySQL ตอบกลับได้หรือยัง มันจะตอบ mysqld is alive ถ้าเชื่อมต่อได้
+          # ลองเชื่อมต่อสูงสุด 40 ครั้ง ห่างกันครั้งละ 2 วินาที
+          for i in {1..20}; do
             mysqladmin ping -h 127.0.0.1 -uroot -prootStrong123 && break
             echo "⏳ waiting for mysql..."; sleep 2
           done
-          mysql -h 127.0.0.1 -P 3306 -uappuser -pappPass123 todo_app < ./sql/schema.sql
+      
+      # หลังจาก MySQL พร้อมแล้ว ให้นำไฟล์ schema.sql เข้า MySQL Container
+      - name: Seed schema
+        run: mysql -h 127.0.0.1 -P 3306 -uappuser -pappPass123 todo_app < ./sql/schema.sql
 
+      # ลองส่ง HTTP request มาที่ API  โดยถ้าผ่านจะแสดง respond 200
       - name: Test (backend)
         working-directory: ./api
         env:
@@ -85,18 +88,19 @@ jobs:
           DB_NAME: todo_app
         run: npm test
 
-  # ==============================================================
-  # 🐳 2. Build & Push Docker images → NIPA Cloud
-  # ==============================================================
   build-and-push:
-    name: Build & Push to NIPA Registry
+    name: Build & Push Images to NIPA Cloud Registry
     runs-on: ubuntu-latest
-    needs: test-quality  # ✅ จะรันต่อเมื่อขั้นตอนด้านบนผ่านทั้งหมด
+
+    # จะรันต่อเมื่อขั้นตอนด้านบน หรือ test-api ผ่านทั้งหมด
+    needs: test-api
 
     steps:
+      # Checkout code from the repository
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Set up Docker
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       
@@ -109,7 +113,7 @@ jobs:
           password: ${{ secrets.NIPA_PASSWORD }}
 
       # Build & Push Frontend
-      - name: Build and Push Frontend
+      - name: Build and Push Frontend to NIPA Cloud Registry
         uses: docker/build-push-action@v5
         with:
           context: ./my-app
@@ -118,7 +122,7 @@ jobs:
           tags: registry.nipa.cloud/lun-test/frontend:1.0.0
 
       # Build & Push Backend
-      - name: Build and Push Backend
+      - name: Build and Push Backend to NIPA Cloud Registry
         uses: docker/build-push-action@v5
         with:
           context: ./api

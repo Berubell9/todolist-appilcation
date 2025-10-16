@@ -5,8 +5,12 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata = {
-  title: "Todo List App",
-  viewport: { width: "device-width", initialScale: 1 },
+  title: "Todo List App"
+};
+
+export const viewport = { 
+  width: "device-width", 
+  initialScale: 1
 };
 
 export default function RootLayout({ children }) {
