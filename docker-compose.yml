@@ -2,12 +2,9 @@ version: "3.9"
 
 services:
   web:
-    image: ${REGISTRY}/my-app:${WEB_TAG}
-    build: ./my-app
-    env_file:
-      - ./my-app/.env
+    image: registry.nipa.cloud/lun-test/frontend:1.0.0
     environment:
-      NEXT_PUBLIC_API_BASE_URL: http://host.docker.internal:5000
+      NEXT_PUBLIC_API_BASE_URL: http://api:5000
       NODE_ENV: production
     ports:
       - "3000:3000"
@@ -15,14 +12,14 @@ services:
       - api  
 
   api:
-    image: ${REGISTRY}/tasks-api:${API_TAG}
-    build: ./api
-    env_file:
-      - ./api/.env
+    image: registry.nipa.cloud/lun-test/backend:1.0.0
     environment:
       PORT: "5000"
-      DB_HOST: "mysql"
+      DB_HOST: mysql
       DB_PORT: "3306"
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
     ports:
       - "5000:5000"  
     depends_on:
