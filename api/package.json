@@ -8,6 +8,8 @@
     "mysql2": "^3.14.5"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "lint": "eslint",
+    "test": "echo \"No tests yet\" && exit 0"
   }
 }
