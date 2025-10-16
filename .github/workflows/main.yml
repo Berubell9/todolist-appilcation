@@ -1,32 +1,114 @@
-name: Continous Integrate (CI)
+name: Quality Gate + Build & Push
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  build-and-push:
+  # ==============================================================
+  # ✅ 1. ตรวจสอบคุณภาพ (Lint + Build + Test)
+  # ==============================================================
+  test-quality:
+    name: Lint • Build • Test
     runs-on: ubuntu-latest
 
+    # เพิ่ม MySQL Service เพื่อใช้ทดสอบ Backend
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: rootStrong123
+          MYSQL_DATABASE: todo_app
+          MYSQL_USER: appuser
+          MYSQL_PASSWORD: appPass123
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=5s --health-timeout=3s --health-retries=30
+
     steps:
-      # Checkout code from the repository
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
-      
-      # Set up Docker
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # ---------- Frontend ----------
+      - name: Install deps (frontend)
+        working-directory: ./my-app
+        run: npm ci
+
+      - name: Lint (frontend)
+        working-directory: ./my-app
+        run: npm run lint
+
+      - name: Build (frontend)
+        working-directory: ./my-app
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:5000
+        run: npm run build
+
+      - name: Test (frontend)
+        working-directory: ./my-app
+        run: npm test -- --ci
+
+      # ---------- Backend ----------
+      - name: Install deps (backend)
+        working-directory: ./api
+        run: npm ci
+
+      - name: Seed schema to test DB
+        run: |
+          sudo apt-get update && sudo apt-get install -y mysql-client
+          mysql -h 127.0.0.1 -P 3306 -uappuser -pappPass123 todo_app < ./sql/schema.sql
+
+      - name: Lint (backend)
+        working-directory: ./api
+        run: npm run lint
+
+      - name: Build (backend)
+        working-directory: ./api
+        run: npm run build --if-present
+
+      - name: Test (backend)
+        working-directory: ./backend
+        env:
+          NODE_ENV: test
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USER: appuser
+          DB_PASSWORD: appPass123
+          DB_NAME: todo_app
+        run: npm test -- --ci
+
+  # ==============================================================
+  # 🐳 2. Build & Push Docker images → NIPA Cloud
+  # ==============================================================
+  build-and-push:
+    name: Build & Push to NIPA Registry
+    runs-on: ubuntu-latest
+    needs: test-quality  # ✅ จะรันต่อเมื่อขั้นตอนด้านบนผ่านทั้งหมด
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
+      
       # Login to NIPA Cloud Registry
-      - name: Login to NIPA Cloud Container Registry
+      - name: Login to NIPA Cloud Registry
         uses: docker/login-action@v3
         with:
           registry: registry.nipa.cloud
           username: ${{ secrets.NIPA_USERNAME }}
           password: ${{ secrets.NIPA_PASSWORD }}
 
-      # Build & Push Frontend image
+      # Build & Push Frontend
       - name: Build and Push Frontend
         uses: docker/build-push-action@v5
         with:
@@ -35,7 +117,7 @@ jobs:
           push: true
           tags: registry.nipa.cloud/lun-test/frontend:1.0.0
 
-      # Build & Push Backend image
+      # Build & Push Backend
       - name: Build and Push Backend
         uses: docker/build-push-action@v5
         with:
