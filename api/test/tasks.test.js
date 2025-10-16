@@ -7,12 +7,10 @@ test("GET /tasks should respond 200", async () => {
   expect([200, 500]).toContain(res.statusCode);
 });
 afterAll(async () => {
-  try {
-    if (pool && typeof pool.end === "function") {
-      await pool.end();            // ปิดทุก connection ใน pool
-    }
-  } finally {
-    // หน่วงให้ event loop เคลียร์ handle ที่เพิ่งปิด
-    await new Promise((r) => setImmediate(r));
+  // ปิด pool ให้หมดเกลี้ยง
+  if (pool && typeof pool.end === "function") {
+    await pool.end();
   }
+  // กันกรณี event loop ยังไม่ว่างจริง ๆ
+  await new Promise((r) => setTimeout(r, 20));
 });

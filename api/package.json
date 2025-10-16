@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node index.js",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --config ./jest.config.mjs --detectOpenHandles"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --config ./jest.config.mjs --detectOpenHandles --forceExit"
   },
   "devDependencies": {
     "jest": "^30.2.0",
