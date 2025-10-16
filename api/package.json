@@ -9,7 +9,13 @@
   },
   "scripts": {
     "start": "node index.js",
-    "lint": "eslint",
+    "lint": "eslint .",
     "test": "echo \"No tests yet\" && exit 0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.37.0",
+    "eslint": "^9.37.0",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^16.4.0"
   }
 }
