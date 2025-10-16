@@ -27,7 +27,7 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD || process.env.DB_PASS, // รองรับทั้งสองชื่อ
   database: process.env.DB_NAME,
   waitForConnections: true,
-  connectionLimit: 10,
+  connectionLimit: process.env.NODE_ENV === "test" ? 1 : 10,
 });
 
 // health
