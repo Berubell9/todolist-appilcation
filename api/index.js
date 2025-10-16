@@ -9,6 +9,7 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // โหลด .env ในโฟลเดอร์ api เสมอ (กันกรณีรันจากโฟลเดอร์อื่น)
 dotenv.config({ path: path.join(__dirname, ".env") });
+dotenv.config({ debug: false }); // ปิดข้อความ debug
 
 const app = express();
 app.use(cors());
