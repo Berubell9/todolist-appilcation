@@ -6,3 +6,7 @@ test("GET /tasks should respond 200", async () => {
   // อาจได้ 200 หรือ 500 ถ้า DB ยังไม่พร้อม
   expect([200, 500]).toContain(res.statusCode);
 });
+afterAll(async () => {
+  // ปิด MySQL pool เพื่อไม่ให้มี open handles
+  await pool.end();
+});
