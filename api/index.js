@@ -138,4 +138,8 @@ app.delete("/tasks/:id", async (req, res) => {
 });
 
 const port = Number(process.env.PORT || 5000);
-app.listen(port, () => console.log(`API ready on http://localhost:${port}`));
+if (process.env.NODE_ENV !== "test") {
+  app.listen(port, () => console.log(`API ready on http://localhost:${port}`));
+}
+
+export default app;

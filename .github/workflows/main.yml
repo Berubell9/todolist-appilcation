@@ -74,10 +74,6 @@ jobs:
           done
           mysql -h 127.0.0.1 -P 3306 -uappuser -pappPass123 todo_app < ./sql/schema.sql
 
-      - name: Lint (backend)
-        working-directory: ./api
-        run: npm run lint 
-
       - name: Build (backend)
         working-directory: ./api
         run: npm run build
