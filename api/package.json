@@ -9,11 +9,13 @@
   },
   "scripts": {
     "start": "node index.js",
-    "test": "jest --runInBand"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand"
   },
-    "jest": {
-    "testEnvironment": "node"
-    
+  "jest": {
+    "testEnvironment": "node",
+    "extensionsToTreatAsEsm": [".js"],
+    "testMatch": ["<rootDir>/test/**/*.test.js", "<rootDir>/__tests__/**/*.test.js"],
+    "transform": {}
   },
   "devDependencies": {
     "jest": "^30.2.0",
