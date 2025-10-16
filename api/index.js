@@ -9,7 +9,6 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // โหลด .env ในโฟลเดอร์ api เสมอ (กันกรณีรันจากโฟลเดอร์อื่น)
 dotenv.config({ path: path.join(__dirname, ".env") });
-dotenv.config({ debug: false }); // ปิดข้อความ debug
 
 const app = express();
 app.use(cors());
@@ -28,7 +27,7 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD || process.env.DB_PASS, // รองรับทั้งสองชื่อ
   database: process.env.DB_NAME,
   waitForConnections: true,
-  connectionLimit: 1,
+  connectionLimit: 10,
 });
 
 // health

@@ -7,14 +7,12 @@ test("GET /tasks should respond 200", async () => {
   expect([200, 500]).toContain(res.statusCode);
 });
 afterAll(async () => {
-  // ปิด MySQL pool เพื่อไม่ให้มี open handles
   try {
     if (pool && typeof pool.end === "function") {
-      await pool.end();
+      await pool.end();            // ปิดทุก connection ใน pool
     }
-  } catch (_) {
-    // เงียบไว้ ไม่ให้เทสล้มเพราะตอนปิด
+  } finally {
+    // หน่วงให้ event loop เคลียร์ handle ที่เพิ่งปิด
+    await new Promise((r) => setImmediate(r));
   }
-  // หน่วงนิดให้ event loop ว่าง
-  await new Promise((r) => setTimeout(r, 20));
 });
