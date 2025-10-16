@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node index.js",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand"
+    "test": "jest --runInBand"
   },
   "jest": {
     "testEnvironment": "node",
