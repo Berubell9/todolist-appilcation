@@ -7,7 +7,7 @@ test("GET /tasks should respond 200", async () => {
   expect([200, 500]).toContain(res.statusCode);
 });
 afterAll(async () => {
-  // ✅ ปิด MySQL pool กัน open handles ค้าง
+  // ปิด MySQL pool กัน open handles ค้าง
   try {
     if (pool && typeof pool.end === "function") {
       await pool.end();
