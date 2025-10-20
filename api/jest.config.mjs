@@ -1,5 +1,7 @@
 export default {
-  testEnvironment: 'node',
-  testMatch: ['<rootDir>/test/**/*.test.js', '<rootDir>/__tests__/**/*.test.js'],
-  transform: {},
-};
+  testEnvironment: "node",
+  roots: ["<rootDir>"],
+  testMatch: ["**/?(*.)+(test|spec).[jm]s"],
+  testPathIgnorePatterns: ["/node_modules/"],
+  transform: {}, 
+}
