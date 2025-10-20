@@ -1,3 +1,14 @@
+### คำเตือน
+> เวลาเเก้ให้ไปดูที่ .env เเละ manifest/kustomization.yaml ก่อนเสมอ
+
+# อธิบายเเต่ละโฟลเดอร์
+- .github = workflow ของ github action
+- application = file สำหรับ set up Argo CD
+- manifest = manifest file สำหรับสร้าง objects ใน kubernetes
+- my-app = frontend code (next.js + tailwind)
+- api = backend code (node.js + express.js)
+- sql = schema mysql database
+
 # Quick Start
 
 ### เข้าโปรเจค
@@ -8,7 +19,7 @@ cd todolist-appilcation
 
 ## เปิด MySQL (Container)
 
-1. Run MySQL Container
+1. Run MySQL Container (เปลี่ยนรหัสเป็นของตัวเองก็ได้)
     ```base
     docker run -d --name mysql-db \
         -e MYSQL_ROOT_PASSWORD=rootStrong123 \
@@ -20,7 +31,7 @@ cd todolist-appilcation
         mysql:8.4
     ```
 
-2. “สคริปต์แบบอัตโนมัติ” ที่ใช้ให้ Docker รันคำสั่ง SQL ภายใน MySQL container โดยไม่ต้องเข้า shell 
+2. “สคริปต์แบบอัตโนมัติ” ที่ใช้ให้ Docker รันคำสั่ง SQL ภายใน MySQL container ได้โดยไม่ต้องเข้า shell 
     ```base
     docker exec -i mysql-db mysql -uroot -prootStrong123 <<'SQL'
     CREATE USER IF NOT EXISTS 'appuser'@'%' IDENTIFIED BY 'appPass123';
@@ -29,12 +40,12 @@ cd todolist-appilcation
     SQL
     ```
 
-3. รัน Schema ที่เตรียมไว้
+3. รัน Schema ที่เตรียมไว้ให้เข้าไปสร้างใน Container
     ```base
     docker exec -i mysql-db mysql -uroot -prootStrong123 < sql/schema.sql
     ```
 
-4. เช็คว่ามี Schema เเละข้อมูลเข้ามาไหม
+4. เช็คว่ามีตาราง Schema เข้ามาไหม
     ```base
     docker exec -it mysql-db mysql -uappuser -pappPass123 -e "SELECT COUNT(*) rows_in_tasks FROM todo_app.tasks;"
     ```
@@ -74,52 +85,57 @@ npm i
 npm run dev
 ```
 
-# กรณีถูกเเจ้งว่า Port ชนกัน
-### Port ที่ Set ไว้เเบบปกติ
-- Frontend (Next.js) => **Port : 3000**
-- Backend (Node.js + Express.js) => **Port : 5000**
-- Database (MySQL) => **Port : 3306**
+# วิธีเปิดเเบบ docker-compose.yml
 
-### วิธีเเก้ไข
-ดู Process ที่กำลังทำงานอยู่ทั้งหมด
-```base
-ps aux 
-```
-ดู Port ที่กำลังทำงานอยู่ทั้งหมด
-```base
-netstat -tulpn 
-```
----
+1. เข้าโปรเจค
 
-1. **ปัญหาที่ Port 3000** : เช็คว่า Process ของ Frontend Port 3000 ทำงานอยู่ไหม?
     ```base
-    ps aux | grep next
+    cd todolist-appilcation
     ```
-    หากมีการทำงานอยู่ให้ kill ทิ้งเเล้วลองรัน Frontend ใหม่
+
+2. Run Docker Compose File
+
     ```base
-    kill -9 <Process ID>
+    docker compose up -d
     ```
+    ควรเห็น : Container ชื่อ 
+    - todolist-appilcation-web-1
+    - todolist-appilcation-api-1
+    - todolist-appilcation-mysql-1
 
-2. **ปัญหาที่ Port 5000** : เช็คว่า Process ของ Backend Port 5000 ทำงานอยู่ไหม?
+3. เช็คก่อนใช้งาน
+    
+    - เช็คว่า MySQL is Alive ไหม
+        ```base
+        docker exec todolist-appilcation-mysql-1 sh -c 'until mysqladmin ping -h 127.0.0.1 -uroot -prootStrong123 --silent; do sleep 1; done'
+        ```
+         ควรเห็น : mysql is alive
+
+    - เช็ค env ใน Container ของ Frontend
+        ```base
+        docker exec -it todolist-appilcation-web-1 sh -lc 'printenv | grep API_BASE_URL'
+        ```
+        ควรเห็น : API_BASE_URL=http://api:5000
+
+4. รัน Schema ที่เตรียมไว้
     ```base
-    lsof -i :5000
+    docker exec -i todolist-appilcation-mysql-1 mysql -uroot -prootStrong123 < ./sql/schema.sql
     ```
-    หากมีการทำงานอยู่ให้ kill ทิ้งเเล้วลองรัน Backend ใหม่
+
+5. เช็คว่ามีตาราง Schema เข้ามาไหม
     ```base
-    kill -9 <Process ID>
+    docker exec -it todolist-appilcation-mysql-1 mysql -uroot -prootStrong123 -e "SHOW TABLES IN todo_app;"
     ```
 
-3. **ปัญหาที่ Port 3306** : เช็คว่า Process ของ MySQL Port 3306 ทำงานอยู่ไหม?
-    ``` py
-    # คำสั่งไหนก็ได้ แต่แนะนำดูที่ Docker ก่อน
-
-    docker ps -a
-
-    ps aux | grep 3306
-
-    lsof -i :3306
-    ```
-    หากมีการทำงานอยู่ให้ลบทิ้งเเล้วลองรัน MySQL ใหม่
+6. ทดสอบ API
     ```base
-    docker rm -f <Container Name>
+    docker exec -it todolist-appilcation-web-1 sh -lc 'apk add -q curl || :; curl -sv http://api:5000/tasks | head'
     ```
+    ควรเห็น : 200 ok
+
+7. Down Docker Compose File
+    ```base
+    docker compose down
+    ```
+
+8. ถ้ามีการอัพเดต docker-compose.yml ให้ลบ Container เเละ docker compose up -d ขึ้นมาใหม่

@@ -22,7 +22,7 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -prootStrong123"
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -p${{ secrets.DB_ROOT_PASSWORD }}"
           --health-interval=5s --health-timeout=3s --health-retries=30
 
     steps:
@@ -44,9 +44,13 @@ jobs:
       - name: Install dependencies (frontend)
         working-directory: ./my-app
         run: npm ci
+      
+      # ช่วยเรียง Script tailwind ใน ClassName 
+      - name: Prettier Check
+        run: npm run format
 
       # ช่วยตรวจสอบไวยกรณ์ เและทำให้โค้ดเป็นมาตรฐาน เช่น การเว้นวรรค หรือเครื่องหมาย
-      # ใช้เครื่องมือ eslint https://medium.com/lotuss-it/eslint-tool-ที่ทำให้โค้ดสวยขึ้น-9384a9c43d3c
+      # ใช้เครื่องมือ eslint
       - name: Run Linting tests (frontend)
         working-directory: ./my-app
         run: npm run lint 
@@ -68,14 +72,15 @@ jobs:
           # เป็นคำสั่งเช็คว่า MySQL ตอบกลับได้หรือยัง มันจะตอบ mysqld is alive ถ้าเชื่อมต่อได้
           # ลองเชื่อมต่อสูงสุด 40 ครั้ง ห่างกันครั้งละ 2 วินาที
           for i in {1..20}; do
-            mysqladmin ping -h 127.0.0.1 -uroot -prootStrong123 && break
+            if mysqladmin ping -h 127.0.0.1 -uroot -p"${{ secrets.DB_ROOT_PASSWORD }}" --silent; then
+              echo "MySQL is healthy"; break
+            fi
             echo "⏳ waiting for mysql..."; sleep 2
           done
       
       # หลังจาก MySQL พร้อมแล้ว ให้นำไฟล์ schema.sql เข้า MySQL Container
       - name: Seed schema
-        run: mysql -h 127.0.0.1 -P 3306 -uappuser -pappPass123 todo_app < ./sql/schema.sql
-
+        run: mysql -h 127.0.0.1 -P 3306 -u"${{ secrets.DB_USER }}" -p"${{ secrets.DB_PASSWORD }}" "${{ secrets.DB_NAME }}" < ./sql/schema.sql
       # ลองส่ง HTTP request มาที่ API  โดยถ้าผ่านจะแสดง respond 200
       - name: Test (backend)
         working-directory: ./api
@@ -83,13 +88,14 @@ jobs:
           NODE_ENV: test
           DB_HOST: 127.0.0.1
           DB_PORT: 3306
-          DB_USER: appuser
-          DB_PASSWORD: appPass123
-          DB_NAME: todo_app
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
         run: npm test
 
+# Build & Push Images to NIPA Cloud Registry
   build-and-push:
-    name: Build & Push Images to NIPA Cloud Registry
+    name: Build & Push Images to Registry
     runs-on: ubuntu-latest
 
     # จะรันต่อเมื่อขั้นตอนด้านบน หรือ test-api ผ่านทั้งหมด
@@ -99,6 +105,39 @@ jobs:
       # Checkout code from the repository
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+
+      # คำนวณแท็กใหม่แบบ 1.0.X ของ images (บัมพ์ patch)
+      - name: Compute next image tag
+        id: semver
+        shell: bash
+        run: |
+          # หาแท็กล่าสุด (ถ้าไม่มี ให้เริ่มที่ 1.0.0)
+          LAST_TAG=$(git tag --list | sort -V | tail -n1)
+          if [[ -z "$LAST_TAG" ]]; then
+            LAST_TAG="1.0.0"
+          fi
+          echo "Last tag : $LAST_TAG"
+
+          # แยกส่วน Major.Minor.Patch
+          IFS='.' read -r MA MI PA <<< "$LAST_TAG"
+          if [[ -z "$MA" || -z "$MI" || -z "$PA" ]]; then
+            echo "รูปแบบ tag ล่าสุดไม่ถูกต้อง (ต้องเป็น X.Y.Z): $LAST_TAG"
+            exit 1
+          fi
+
+          # ถ้า patch ถึง 9 → เพิ่ม minor แล้วรีเซ็ต patch = 0
+          if (( PA >= 9 )); then
+            PA=0
+            MI=$((MI+1))
+          else
+            PA=$((PA+1))
+          fi
+
+          NEXT_TAG="$MA.$MI.$PA"
+          echo "Next tag : $NEXT_TAG"
+          echo "NEXT_TAG=$NEXT_TAG" >> $GITHUB_ENV
 
       # Set up Docker
       - name: Set up Docker Buildx
@@ -112,20 +151,50 @@ jobs:
           username: ${{ secrets.NIPA_USERNAME }}
           password: ${{ secrets.NIPA_PASSWORD }}
 
-      # Build & Push Frontend
+      # ===== Build & Push Frontend =====
       - name: Build and Push Frontend to NIPA Cloud Registry
         uses: docker/build-push-action@v5
         with:
           context: ./my-app
           file: ./my-app/Dockerfile
           push: true
-          tags: registry.nipa.cloud/lun-test/frontend:1.0.0
+          tags: |
+            registry.nipa.cloud/lun-test/frontend:${{ env.NEXT_TAG }}
+            registry.nipa.cloud/lun-test/frontend:latest
 
-      # Build & Push Backend
+      # ===== Build & Push Backend =====
       - name: Build and Push Backend to NIPA Cloud Registry
         uses: docker/build-push-action@v5
         with:
           context: ./api
           file: ./api/Dockerfile
           push: true
-          tags: registry.nipa.cloud/lun-test/backend:1.0.0
+          tags: |
+            registry.nipa.cloud/lun-test/backend:${{ env.NEXT_TAG }}
+            registry.nipa.cloud/lun-test/backend:latest
+
+      # Update tag images the K8s Manifest Files to kustomization.yaml
+      - name: Update Kustomize images
+        uses: mikefarah/yq@v4
+        with:
+          cmd: |
+            yq -i '
+              (.images[] | select(.name=="registry.nipa.cloud/lun-test/frontend").newTag) = strenv(NEXT_TAG) |
+              (.images[] | select(.name=="registry.nipa.cloud/lun-test/backend").newTag) = strenv(NEXT_TAG)
+            ' k8s/kustomization.yaml
+
+      # Update Git tag and commit
+      - name: Commit changes & push tag
+        env:
+          NEXT_TAG: ${{ env.NEXT_TAG }}
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+
+          git add manifest/kustomization.yaml
+          git commit -m "chore(ci): bump image tag to ${NEXT_TAG}" || echo "no changes to commit"
+
+          # สร้าง Git tag 1.0.X และ push
+          git tag "${NEXT_TAG}" || echo "tag already exists?"
+          git push origin HEAD:main
+          git push origin "${NEXT_TAG}"

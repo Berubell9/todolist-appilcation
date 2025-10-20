@@ -1,4 +1,4 @@
-"use client"; //บอก Next.js ว่า component นี้ต้องรันฝั่ง client (React)
+"use client" //บอก Next.js ว่า component นี้ต้องรันฝั่ง client (React)
 
 export default function Filters({ filters, setFilters, assignees, view, setView }) {
   return (
@@ -6,7 +6,7 @@ export default function Filters({ filters, setFilters, assignees, view, setView 
       <select
         value={filters.status}
         onChange={(e) => setFilters((f) => ({ ...f, status: e.target.value }))}
-        className="rounded-xl border border-base bg-card text-base px-3 py-2"
+        className="border-base bg-card rounded-xl border px-3 py-2 text-base"
       >
         <option value="all">All statuses</option>
         <option value="todo">To Do</option>
@@ -18,11 +18,13 @@ export default function Filters({ filters, setFilters, assignees, view, setView 
       <select
         value={filters.assignee}
         onChange={(e) => setFilters((f) => ({ ...f, assignee: e.target.value }))}
-        className="rounded-xl border border-base bg-card text-base px-3 py-2"
+        className="border-base bg-card rounded-xl border px-3 py-2 text-base"
       >
         <option value="all">All assignees</option>
         {assignees.map((a) => (
-          <option key={a} value={a}>{a}</option>
+          <option key={a} value={a}>
+            {a}
+          </option>
         ))}
       </select>
 
@@ -31,19 +33,19 @@ export default function Filters({ filters, setFilters, assignees, view, setView 
         value={filters.q}
         onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
         placeholder="Find…"
-        className="w-52 rounded-xl border border-base bg-card text-base px-3 py-2"
+        className="border-base bg-card w-52 rounded-xl border px-3 py-2 text-base"
       />
 
       {/* ปุ่ม Clear */}
       <button
         onClick={() => setFilters({ status: "all", assignee: "all", q: "" })}
-        className="rounded-xl border border-base bg-card text-base px-3 py-2 hover:opacity-90"
+        className="border-base bg-card rounded-xl border px-3 py-2 text-base hover:opacity-90"
       >
         Clear
       </button>
 
       {/* ปุ่มเลือกมุมมอง (Board / List) */}
-      <div className="ml-auto flex items-center gap-2 rounded-xl border border-base bg-card p-1">
+      <div className="border-base bg-card ml-auto flex items-center gap-2 rounded-xl border p-1">
         <button
           onClick={() => setView("board")}
           className={`rounded-lg px-3 py-1 ${view === "board" ? "bg-[var(--border)]/40" : ""}`}
@@ -58,7 +60,7 @@ export default function Filters({ filters, setFilters, assignees, view, setView 
         </button>
       </div>
     </div>
-  );
+  )
 }
 
 /*จากfunction Filters

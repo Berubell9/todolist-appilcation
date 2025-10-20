@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: applications
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - cluster: cluster-1
+            url: https://103.74.253.14:6443
+          - cluster: cluster-2
+            url: https://103.74.253.23:6443
+  template:
+    metadata:
+      name: 'todolist-app-{{cluster}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/Berubell9/todolist-appilcation.git
+        targetRevision: main
+        path: manifest
+      destination:
+        server: '{{url}}'
+        namespace: todolist-app
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: false

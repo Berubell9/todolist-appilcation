@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  namespace: todolist-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: registry.nipa.cloud/lun-test/backend:1.0.0
+          ports:
+            - containerPort: 5000
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              value: "5000"
+            - name: DB_HOST
+              value: mysql
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_USER
+              value: appuser
+            - name: DB_PASSWORD
+              value: appPass123
+            - name: DB_NAME
+              value: todo_app
+          readinessProbe:
+            httpGet:
+              path: /tasks
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 5

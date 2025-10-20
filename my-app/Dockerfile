@@ -11,7 +11,6 @@ ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# กันกรณีโปรเจกต์ไม่มีโฟลเดอร์ public → สร้างว่างไว้ให้ COPY ได้
 RUN mkdir -p public
 RUN --mount=type=cache,target=/root/.npm npm run build
 
@@ -22,7 +21,6 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-# คัดลอกเฉพาะไฟล์ที่ต้องใช้ในโหมด standalone
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public

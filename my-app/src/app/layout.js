@@ -1,17 +1,17 @@
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import { Geist, Geist_Mono } from "next/font/google"
+import "./globals.css"
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] })
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] })
 
 export const metadata = {
-  title: "Todo List App"
-};
+  title: "Todo List App",
+}
 
-export const viewport = { 
-  width: "device-width", 
-  initialScale: 1
-};
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+}
 
 export default function RootLayout({ children }) {
   return (
@@ -33,9 +33,7 @@ export default function RootLayout({ children }) {
           }}
         />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {children}
-      </body>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
     </html>
-  );
+  )
 }
