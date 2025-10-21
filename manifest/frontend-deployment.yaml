@@ -22,7 +22,7 @@ spec:
             - name: NODE_ENV
               value: production
             - name: NEXT_PUBLIC_API_BASE_URL
-              value: http://backend:5000
+              value: http://backend-service:5000
           readinessProbe:
             httpGet:
               path: /

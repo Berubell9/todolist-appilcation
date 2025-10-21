@@ -12,9 +12,12 @@ resources:
   - mysql-deployment.yaml
   - mysql-service.yaml
   - mysql-secret.yaml
-  - mysql-storage.yaml
+  - mysql-pv.yaml
+  - mysql-pvc.yaml
+  - mysql-initdb-config.yaml
   - backend-deployment.yaml
   - backend-service.yaml
+  - backend-secret.yaml
   - frontend-deployment.yaml
   - frontend-service.yaml
   - frontend-ingress.yaml

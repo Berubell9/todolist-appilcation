@@ -4,7 +4,10 @@ metadata:
   name: mysql-service
   namespace: todolist-app
 spec:
-  ports:
-  - port: 3306
+  type: ClusterIP
   selector:
     app: mysql
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306
