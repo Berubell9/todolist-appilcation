@@ -26,7 +26,7 @@ data:
     ('Edit 3 clips to completion','Launch event clips','in_progress','Fai','2025-08-11'),
     ('Edit Zigmadey clip',NULL,'done','Team','2025-08-08');
 
-  02-user.sql: |
-    CREATE USER IF NOT EXISTS 'appuser'@'%' IDENTIFIED BY 'appPass123';
-    GRANT ALL PRIVILEGES ON todo_app.* TO 'appuser'@'%';
-    FLUSH PRIVILEGES;
+  # 02-user.sql: |
+  #   CREATE USER IF NOT EXISTS 'appuser'@'%' IDENTIFIED BY 'appPass123';
+  #   GRANT ALL PRIVILEGES ON todo_app.* TO 'appuser'@'%';
+  #   FLUSH PRIVILEGES;
