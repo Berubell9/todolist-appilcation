@@ -174,7 +174,7 @@ jobs:
             yq -i '
               (.images[] | select(.name=="registry.nipa.cloud/lun-test/frontend").newTag) = strenv(NEXT_TAG) |
               (.images[] | select(.name=="registry.nipa.cloud/lun-test/backend").newTag) = strenv(NEXT_TAG)
-            ' k8s/kustomization.yaml
+            ' manifest/kustomization.yaml
 
       # Update Git tag and commit
       - name: Commit changes & push tag
