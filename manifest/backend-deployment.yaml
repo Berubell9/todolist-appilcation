@@ -8,14 +8,10 @@ spec:
   selector:
     matchLabels:
       app: backend
-      app.kubernetes.io/name: todolist-app
-      app.kubernetes.io/part-of: todolist-stack
   template:
     metadata:
       labels:
         app: backend
-        app.kubernetes.io/name: todolist-app
-        app.kubernetes.io/part-of: todolist-stack
     spec:
       containers:
         - name: backend

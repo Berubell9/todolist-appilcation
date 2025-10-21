@@ -7,12 +7,16 @@ spec:
   selector:
     matchLabels:
       app: mysql
+      app.kubernetes.io/name: todolist-app
+      app.kubernetes.io/part-of: todolist-stack
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
         app: mysql
+        app.kubernetes.io/name: todolist-app
+        app.kubernetes.io/part-of: todolist-stack
     spec:
       containers:
       - image: mysql:9.4.0
