@@ -26,9 +26,12 @@ spec:
               value: mysql-service
             - name: DB_PORT
               value: "3306"
-            - name: DB_NAME
-              value: todo_app
 
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: DB_NAME
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
