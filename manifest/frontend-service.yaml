@@ -4,9 +4,10 @@ metadata:
   name: frontend-service
   namespace: todolist-app
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: frontend
   ports:
     - port: 3000
       targetPort: 3000
+      nodePort: 31000

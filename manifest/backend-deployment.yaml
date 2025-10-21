@@ -41,10 +41,10 @@ spec:
                 secretKeyRef:
                   name: backend-secret
                   key: DB_PASSWORD
-
+                  
           readinessProbe:
             httpGet:
-              path: /tasks
+              path: /healthz
               port: 5000
             initialDelaySeconds: 10
             periodSeconds: 5
