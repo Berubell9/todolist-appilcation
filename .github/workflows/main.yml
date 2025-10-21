@@ -170,15 +170,28 @@ jobs:
             registry.nipa.cloud/lun-test/backend:${{ env.NEXT_TAG }}
             registry.nipa.cloud/lun-test/backend:latest
 
+
       # Update tag images the K8s Manifest Files to kustomization.yaml
-      - name: Update Kustomize images
+      - name: Update tag images to Kustomize
         uses: mikefarah/yq@v4
         with:
           cmd: |
+            echo "Updating tag images to kustomization.yaml"
             yq -i '
               (.images[] | select(.name=="registry.nipa.cloud/lun-test/frontend").newTag) = strenv(NEXT_TAG) |
               (.images[] | select(.name=="registry.nipa.cloud/lun-test/backend").newTag) = strenv(NEXT_TAG)
             ' manifest/kustomization.yaml
+
+      # Update tag images to .env Files
+      - name: Update tag in .env
+        shell: bash
+        run: |
+          ENV_FILE=".env"
+          echo "Updating WEB_TAG and API_TAG to ${NEXT_TAG}"
+          sed -i "s|^WEB_TAG=.*|WEB_TAG=${NEXT_TAG}|g" "$ENV_FILE"
+          sed -i "s|^API_TAG=.*|API_TAG=${NEXT_TAG}|g" "$ENV_FILE"
+          cat $ENV_FILE
+
 
       # Update Git tag and commit
       - name: Commit changes & push tag
