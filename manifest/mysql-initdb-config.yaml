@@ -4,7 +4,7 @@ metadata:
   name: mysql-initdb-config
   namespace: todolist-app
 data:
-  schema.sql: |
+  01-schema.sql: |
     CREATE DATABASE IF NOT EXISTS todo_app
       CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
     USE todo_app;
@@ -25,3 +25,8 @@ data:
     ('Submit meeting report','Report on project progress','todo','Fai','2025-08-15'),
     ('Edit 3 clips to completion','Launch event clips','in_progress','Fai','2025-08-11'),
     ('Edit Zigmadey clip',NULL,'done','Team','2025-08-08');
+
+  02-user.sql: |
+    CREATE USER IF NOT EXISTS 'appuser'@'%' IDENTIFIED BY 'appPass123';
+    GRANT ALL PRIVILEGES ON todo_app.* TO 'appuser'@'%';
+    FLUSH PRIVILEGES;
