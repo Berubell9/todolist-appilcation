@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
 
+# เปิดสิทธิ์เขียนคอนเทนต์ (commit/push/tag)
+permissions:
+  contents: write
+
 jobs:
   test-api:
     name: Test API
