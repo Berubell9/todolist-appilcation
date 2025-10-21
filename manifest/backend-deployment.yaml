@@ -19,6 +19,8 @@ spec:
           ports:
             - containerPort: 5000
           env:
+            - name: NODE_ENV
+              value: production
             - name: PORT
               value: "5000"
 
@@ -42,9 +44,10 @@ spec:
                 secretKeyRef:
                   name: backend-secret
                   key: DB_PASSWORD
-                  
+
           readinessProbe:
-            tcpSocket:
+            httpGet:
+              path: /healthz
               port: 5000
-            initialDelaySeconds: 5
+            initialDelaySeconds: 10
             periodSeconds: 5
