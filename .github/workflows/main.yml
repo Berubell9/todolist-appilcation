@@ -201,7 +201,7 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
 
-          git add manifest/kustomization.yaml
+          git add manifest/kustomization.yaml .env 2>/dev/null || true
           git commit -m "chore(ci): bump image tag to ${NEXT_TAG}" || echo "no changes to commit"
 
           # สร้าง Git tag 1.0.X และ push

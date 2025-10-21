@@ -20,6 +20,7 @@ resources:
   - frontend-deployment.yaml
   - frontend-service.yaml
   - frontend-ingress.yaml
+  
 # ให้  workflow ของ github มาเเก้ tag ในนี้
 images:
   - name: registry.nipa.cloud/lun-test/frontend
