@@ -24,6 +24,6 @@ resources:
 # ให้  workflow ของ github มาเเก้ tag ในนี้
 images:
   - name: registry.nipa.cloud/todolist-app/frontend
-    newTag: "1.0.1"
+    newTag: "1.0.5"
   - name: registry.nipa.cloud/todolist-app/backend
-    newTag: "1.0.1"
+    newTag: "1.0.5"
