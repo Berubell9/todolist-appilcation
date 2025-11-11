@@ -156,8 +156,8 @@ jobs:
           file: ./my-app/Dockerfile
           push: true
           tags: |
-            registry.nipa.cloud/lun-test/frontend:${{ env.NEXT_TAG }}
-            registry.nipa.cloud/lun-test/frontend:latest
+            registry.nipa.cloud/todolist-app/frontend:${{ env.NEXT_TAG }}
+            registry.nipa.cloud/todolist-app/frontend:latest
 
       # ===== Build & Push Backend =====
       - name: Build and Push Backend to NIPA Cloud Registry
@@ -167,8 +167,8 @@ jobs:
           file: ./api/Dockerfile
           push: true
           tags: |
-            registry.nipa.cloud/lun-test/backend:${{ env.NEXT_TAG }}
-            registry.nipa.cloud/lun-test/backend:latest
+            registry.nipa.cloud/todolist-app/backend:${{ env.NEXT_TAG }}
+            registry.nipa.cloud/todolist-app/backend:latest
 
 
       # Update tag images the K8s Manifest Files to kustomization.yaml
@@ -178,8 +178,8 @@ jobs:
           cmd: |
             echo "Updating tag images to kustomization.yaml"
             yq -i '
-              (.images[] | select(.name=="registry.nipa.cloud/lun-test/frontend").newTag) = strenv(NEXT_TAG) |
-              (.images[] | select(.name=="registry.nipa.cloud/lun-test/backend").newTag) = strenv(NEXT_TAG)
+              (.images[] | select(.name=="registry.nipa.cloud/todolist-app/frontend").newTag) = strenv(NEXT_TAG) |
+              (.images[] | select(.name=="registry.nipa.cloud/todolist-app/backend").newTag) = strenv(NEXT_TAG)
             ' manifest/kustomization.yaml
 
       # Update tag images to .env Files

@@ -23,7 +23,7 @@ resources:
   - frontend-ingress.yaml
 # ให้  workflow ของ github มาเเก้ tag ในนี้
 images:
-  - name: registry.nipa.cloud/lun-test/frontend
-    newTag: "1.0.4"
-  - name: registry.nipa.cloud/lun-test/backend
-    newTag: "1.0.4"
+  - name: registry.nipa.cloud/todolist-app/frontend
+    newTag: "1.0.1"
+  - name: registry.nipa.cloud/todolist-app/backend
+    newTag: "1.0.1"
