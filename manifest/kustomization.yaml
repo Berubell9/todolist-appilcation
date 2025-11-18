@@ -12,7 +12,6 @@ resources:
   - mysql-deployment.yaml
   - mysql-service.yaml
   - mysql-secret.yaml
-  - mysql-pv.yaml
   - mysql-pvc.yaml
   - mysql-initdb-config.yaml
   - backend-deployment.yaml
