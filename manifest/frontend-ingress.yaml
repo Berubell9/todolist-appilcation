@@ -3,11 +3,10 @@ kind: Ingress
 metadata:
   name: frontend-ingress
   namespace: todolist-app
-  annotations:
-     kubernetes.io/ingress.class: "nginx"
 spec:
+  ingressClassName: nginx
   rules:
-  - host: todolist.application.lun.com 
+  - host: todolist.app.thaiopenstack.com 
     http:
       paths:
       - path: /
