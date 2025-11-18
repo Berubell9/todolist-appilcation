@@ -1,16 +1,12 @@
 apiVersion: v1
-kind: PersistentVolume
+kind: PersistentVolumeClaim
 metadata:
-  name: mysql-pv-volume
+  name: mysql-pv-claim
   namespace: todolist-app
-  labels:
-    type: local
 spec:
-  storageClassName: longhorn
-  capacity:
+  storageClassName: standard-ssd-default
+  request:
     storage: 20Gi
   accessModes:
     - ReadWriteOnce
-  hostPath:
-    path: "/mnt/data"
 
