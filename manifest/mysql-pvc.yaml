@@ -5,8 +5,8 @@ metadata:
   namespace: todolist-app
 spec:
   storageClassName: standard-ssd-default
-  request:
-    storage: 20Gi
   accessModes:
     - ReadWriteOnce
-
+  resources:
+    requests:
+      storage: 20Gi
