@@ -170,7 +170,14 @@ jobs:
             registry.nipa.cloud/todolist-app/backend:${{ env.NEXT_TAG }}
             registry.nipa.cloud/todolist-app/backend:latest
 
+  update-tags:
+    name: Update Tags
+    runs-on: ubuntu-latest
 
+    # จะรันต่อเมื่อขั้นตอนด้านบน หรือ test-api ผ่านทั้งหมด
+    needs: build-and-push
+
+    steps:
       # Update tag images the K8s Manifest Files to kustomization.yaml
       - name: Update tag images to Kustomize
         uses: mikefarah/yq@v4
