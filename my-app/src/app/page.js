@@ -44,7 +44,7 @@ export default function Page() {
       .then((data) => console.log("visit api:", data))
       .catch(() => {})
   }, [])
-
+  // load หรือ refresh เเล้วยังเเสดงข้อมูล database ให้หน้าหลักอยู่
   useEffect(() => {
     load()
   }, [filters])
