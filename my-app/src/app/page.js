@@ -36,13 +36,16 @@ export default function Page() {
       setItems([])
     }
   }
-  useEffect(() => {
-    load()
-  }, [filters])
 
-  {
+  // Show Response 200 on logs
+  useEffect(() => {
+    fetch("/api/visit")
+      .then((r) => r.json())
+      .then((data) => console.log("visit api:", data))
+      .catch(() => {})
+  }, [])
+
     /* 3.createTaskนั้นๆ */
-  }
   const createTask = async (e) => {
     e.preventDefault()
     if (!form.title.trim()) return
@@ -92,6 +95,7 @@ export default function Page() {
     if (destination.droppableId !== source.droppableId)
       move(Number(draggableId), destination.droppableId)
   }
+  
 
   return (
     <main className="mx-auto max-w-7xl space-y-6 p-4 text-base sm:p-6 lg:p-8">
