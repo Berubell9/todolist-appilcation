@@ -178,6 +178,12 @@ jobs:
     needs: build-and-push
 
     steps:
+      # Checkout code from the repository
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+          
       # Update tag images the K8s Manifest Files to kustomization.yaml
       - name: Update tag images to Kustomize
         uses: mikefarah/yq@v4
