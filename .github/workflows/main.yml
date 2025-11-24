@@ -97,6 +97,8 @@ jobs:
 
     # จะรันต่อเมื่อขั้นตอนด้านบน หรือ test-api ผ่านทั้งหมด
     needs: test-api
+    outputs:
+      NEXT_TAG: ${{ steps.semver.outputs.NEXT_TAG }}
 
     steps:
       # Checkout code from the repository
