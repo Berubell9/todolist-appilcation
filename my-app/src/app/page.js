@@ -45,6 +45,10 @@ export default function Page() {
       .catch(() => {})
   }, [])
 
+  useEffect(() => {
+    load()
+  }, [filters])
+
     /* 3.createTaskนั้นๆ */
   const createTask = async (e) => {
     e.preventDefault()
